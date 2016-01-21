@@ -1,0 +1,307 @@
+<html>
+
+<head>
+	<title>
+	7-segment led display calculator
+	</title>
+	
+	<script language="javascript">
+		//
+		//
+		//
+		function calculate()
+		{
+			// --- constant data ---
+			var letters = [ "a", "b", "c", "d", "e", "f", "g", "p" ];
+			
+			var seg_matrix =
+			[
+				//a  b  c  d  e  f  g  dp
+				[ 1, 1, 1, 1, 1, 1, 0, 0 ],		// 0
+				[ 0, 1, 1, 0, 0, 0, 0, 0 ],		// 1
+				[ 1, 1, 0, 1, 1, 0, 1, 0 ],		// 2
+				[ 1, 1, 1, 1, 0, 0, 1, 0 ],		// 3
+				[ 0, 1, 1, 0, 0, 1, 1, 0 ],		// 4
+				[ 1, 0, 1, 1, 0, 1, 1, 0 ],		// 5
+				[ 1, 0, 1, 1, 1, 1, 1, 0 ],		// 6
+				[ 1, 1, 1, 0, 0, 0, 0, 0 ],		// 7
+				[ 1, 1, 1, 1, 1, 1, 1, 0 ],		// 8
+				[ 1, 1, 1, 1, 0, 1, 1, 0 ],		// 9
+			];
+			
+			
+			
+			// --- getting elements from html ---
+			var seg = new Array(8);
+			for ( i = 0 ; i < 8; i++ )										// segments selects
+				seg[i] = document.getElementById( "s" + i );
+			
+			var txt_output	= document.getElementById("text_output");		// output textarea
+			var radio_ca	= document.getElementById("radio_ca");			// ca radiobutton
+			var radio_cc	= document.getElementById("radio_cc");			// cc radiobutton
+			
+			
+			// --- generating output ---
+			txt_output.value = "uint8_t seg_table[] = {\n";
+			
+			// letters			
+			txt_output.value += "\t//";
+			for ( i = 0; i < 8; i++ )
+				txt_output.value += letters[ seg[i].selectedIndex ];			
+			txt_output.value += "\n";
+			
+			// table
+			for ( i = 0; i < 10; i++ )
+			{
+				txt_output.value += "\t0b";
+				
+				if (radio_ca.checked)
+				{
+					// common anode
+					for ( j = 0; j < 8; j++ )
+						txt_output.value += ( seg_matrix[ i ][ seg[j].selectedIndex ] * (-1) + 1 );
+				}
+				else
+				{
+					// common cathodes
+					for ( j = 0; j < 8; j++ )
+						txt_output.value += seg_matrix[ i ][ seg[j].selectedIndex ];
+				}
+					
+				if ( i < 9 ) txt_output.value += ",";
+				txt_output.value += "\t // " + i + "\n";
+			}
+			
+			txt_output.value += "};";
+			
+		};
+		
+		//
+		//
+		//
+		function reset_fields()
+		{
+			for ( i = 0; i < 8; i++ )
+				document.getElementById( "s" + i ).selectedIndex = i;
+		
+			var txt_output = document.getElementById("text_output");
+			txt_output.value = 
+				"1. select indicator type (common anode or common cathode);\n" +
+				"2. select segment order;\n" +
+				"3. press 'Calculate' to generate code.";
+		};
+		
+		//
+		//
+		//
+		function reverse_bits()
+		{
+			var temp;
+			
+			for ( i = 0; i < 4; i++ )
+			{
+				temp = document.getElementById( "s" + i ).selectedIndex;		// swap
+				document.getElementById( "s" + i ).selectedIndex = document.getElementById( "s" + (7-i) ).selectedIndex;
+				document.getElementById( "s" + (7-i) ).selectedIndex = temp;
+			}
+		}
+	
+	</script>
+	
+	<style>
+		body {
+			font-family	: Verdana, Helvetica, Arial;
+			font-size	: 8pt;
+		}
+		
+		table {
+			font-size	: 8pt;
+		}
+	
+		th {
+			background-color: CadetBlue;
+			color: white;
+		}
+		
+		td {
+			background-color: GhostWhite;
+		}
+	</style>
+</head>
+
+<!----------------------------------------->
+<body onload="reset_fields()">
+
+<form name="the_form">
+
+<table align=center>
+	<tr>
+		<th colspan=9>
+			.:: 7 segment led dispay calculator ::.
+		</th>
+	</tr>
+	
+	<!-- indicator type selection-->
+	<tr>
+		<td>
+			Type:
+		</td>
+		
+		<td colspan=8>
+			<input type="radio" name="ssd_type" id="radio_ca" value="ca" checked>Common Anode(+)</input><br>
+			<input type="radio" name="ssd_type" id="radio_cc" value="cc">Common Cathode(-)</input>
+		</td>
+	</tr>
+	
+	<tr>
+		<td>
+			Segments order:
+		</td>
+		
+		<td align="center">7</td>		
+		<td align="center">6</td>		
+		<td align="center">5</td>
+		<td align="center">4</td>
+		<td align="center">3</td>
+		<td align="center">2</td>
+		<td align="center">1</td>
+		<td align="center">0</td>
+	</tr>
+	
+	<tr>
+		<td>
+			&nbsp;
+		</td>
+		
+		<td>
+			<select	id="s0">
+			<option value="a" selected>A</option>
+			<option value="b">B</option>
+			<option value="c">C</option>
+			<option value="d">D</option>
+			<option value="e">E</option>
+			<option value="f">F</option>
+			<option value="g">G</option>
+			<option value="dp">DP</option>			
+			</select>
+		</td>
+		
+		<td>
+			<select	id="s1">
+			<option value="a">A</option>
+			<option value="b" selected>B</option>
+			<option value="c">C</option>
+			<option value="d">D</option>
+			<option value="e">E</option>
+			<option value="f">F</option>
+			<option value="g">G</option>
+			<option value="dp">DP</option>			
+			</select>
+		</td>
+		
+		<td>
+			<select	id="s2">
+			<option value="a">A</option>
+			<option value="b">B</option>
+			<option value="c" selected>C</option>
+			<option value="d">D</option>
+			<option value="e">E</option>
+			<option value="f">F</option>
+			<option value="g">G</option>
+			<option value="dp">DP</option>			
+			</select>
+		</td>
+		
+		<td>
+			<select	id="s3">
+			<option value="a">A</option>
+			<option value="b">B</option>
+			<option value="c">C</option>
+			<option value="d" selected>D</option>
+			<option value="e">E</option>
+			<option value="f">F</option>
+			<option value="g">G</option>
+			<option value="dp">DP</option>			
+			</select>
+		</td>
+		
+		<td>
+			<select	id="s4">
+			<option value="a">A</option>
+			<option value="b">B</option>
+			<option value="c">C</option>
+			<option value="d">D</option>
+			<option value="e" selected>E</option>
+			<option value="f">F</option>
+			<option value="g">G</option>
+			<option value="dp">DP</option>			
+			</select>
+		</td>
+		
+		<td>
+			<select	id="s5">
+			<option value="a">A</option>
+			<option value="b">B</option>
+			<option value="c">C</option>
+			<option value="d">D</option>
+			<option value="e">E</option>
+			<option value="f" selected>F</option>
+			<option value="g">G</option>
+			<option value="dp">DP</option>			
+			</select>
+		</td>
+		
+		<td>
+			<select	id="s6">
+			<option value="a">A</option>
+			<option value="b">B</option>
+			<option value="c">C</option>
+			<option value="d">D</option>
+			<option value="e">E</option>
+			<option value="f">F</option>
+			<option value="g" selected>G</option>
+			<option value="dp">DP</option>			
+			</select>
+		</td>
+		
+		<td>
+			<select	id="s7">
+			<option value="a">A</option>
+			<option value="b">B</option>
+			<option value="c">C</option>
+			<option value="d">D</option>
+			<option value="e">E</option>
+			<option value="f">F</option>
+			<option value="g">G</option>
+			<option value="dp" selected>DP</option>			
+			</select>
+		</td>
+	</tr>
+	
+	<tr>
+		<td colspan=9 align="center">
+			<input type="button" name="calc" value="Calculate" onclick="calculate()"></input>
+			<input type="button" name="reset" value="Reset" onclick="reset_fields()"></input>
+			<input type="button" name="reverse" value="Reverse" onclick="reverse_bits()"></input>
+		</td>
+	</tr>
+	
+	<tr>
+		<td colspan=9 align="center">
+			Output:
+		</td>
+	</tr>
+	
+	<tr>
+		<td colspan=9 align="center">			
+			<textarea id="text_output" rows=20 cols=56></textarea>
+		</td>
+	</tr>
+
+</table>
+
+</form>
+
+</body>
+
+</html>
